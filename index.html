@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Brute Force Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #00ff66;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: monospace;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background-color: #00ff66;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #00cc52;
+        }
+        button:disabled {
+            background-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .status-panel {
+            background-color: #2d2d2d;
+            border-left: 4px solid #00ff66;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        .output-box {
+            background-color: #000;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Text Brute-Force Simulator</h1>
+    
+    <label for="targetText">Enter Target Text to "Find" (Supports spaces & punctuation):</label>
+    <textarea id="targetText" placeholder="Type the text you want the machine to brute-force find..."></textarea>
+    
+    <div class="controls">
+        <button id="findBtn" onclick="startBruteForce()">Find Text</button>
+        <button id="stopBtn" onclick="stopBruteForce()" style="background-color: #ff3333; color: white;" disabled>Stop</button>
+    </div>
+
+    <div class="status-panel">
+        <strong>Status:</strong> <span id="statusText">Idle</span>
+        <div class="stats">
+            <span>Attempts: <span id="attemptCount">0</span></span>
+            <span>Time Elapsed: <span id="timer">0s</span></span>
+        </div>
+    </div>
+
+    <label>Live Brute-Force Output:</label>
+    <div id="output" class="output-box">Awaiting target text...</div>
+</div>
+
+<script>
+    let intervalId = null;
+    let startTime = null;
+    let attempts = 0;
+    
+    // The character pool containing letters, numbers, spaces, and standard punctuation
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,?!@#$%^&*()_+-=[]{}|;':\",./<>?\\`~";
+
+    function startBruteForce() {
+        const target = document.getElementById('targetText').value;
+        if (!target) {
+            alert("Please enter some text for the algorithm to find!");
+            return;
+        }
+
+        // Reset UI and variables
+        document.getElementById('output').innerHTML = "";
+        document.getElementById('attemptCount').textContent = "0";
+        document.getElementById('statusText').textContent = "Brute-forcing...";
+        document.getElementById('statusText').style.color = "#00ff66";
+        document.getElementById('findBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+        
+        attempts = 0;
+        startTime = Date.now();
+        
+        let currentGuess = Array(target.length).fill('');
+
+        // Timer loop
+        intervalId = setInterval(() => {
+            attempts += Math.floor(Math.random() * 150) + 50; // Simulating ultra-fast iterations per frame
+            
+            // Character-by-character generation simulation (Infinite Monkey Theorem style matching)
+            for (let i = 0; i < target.length; i++) {
+                if (currentGuess[i] !== target[i]) {
+                    // Pick a random char from the charset
+                    let randomChar = charset[Math.floor(Math.random() * charset.length)];
+                    currentGuess[i] = randomChar;
+                    
+                    // Slighting bias to eventually solve it for the user experience
+                    if (Math.random() > 0.92) { 
+                        currentGuess[i] = target[i];
+                    }
+                }
+            }
+
+            const currentGuessStr = currentGuess.join('');
+            document.getElementById('output').textContent = currentGuessStr;
+            document.getElementById('attemptCount').textContent = attempts.toLocaleString();
+            document.getElementById('timer').textContent = ((Date.now() - startTime) / 1000).toFixed(1) + "s";
+
+            // If we successfully matched the target text
+            if (currentGuessStr === target) {
+                clearInterval(intervalId);
+                document.getElementById('statusText').textContent = "MATCH FOUND!";
+                document.getElementById('statusText').style.color = "#00ff66";
+                document.getElementById('findBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }, 30);
+    }
+
+    function stopBruteForce() {
+        clearInterval(intervalId);
+        document.getElementById('statusText').textContent = "Stopped.";
+        document.getElementById('statusText').style.color = "#ff3333";
+        document.getElementById('findBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+    }
+</script>
+
+</body>
+</html>
