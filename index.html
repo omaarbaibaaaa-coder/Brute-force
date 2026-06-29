@@ -1,275 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinite Text Generator & Finder</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 850px;
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        h1 {
-            color: #00ff66;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            color: #00ff66;
-        }
-        textarea, input[type="text"] {
-            width: 100%;
-            background-color: #2d2d2d;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-family: monospace;
-        }
-        textarea {
-            height: 100px;
-            resize: none;
-        }
-        input[type="text"] {
-            font-size: 16px;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        button {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-start { background-color: #00ff66; color: #121212; }
-        .btn-start:hover { background-color: #00cc52; }
-        .btn-stop { background-color: #ff3333; color: white; }
-        .btn-stop:hover { background-color: #cc0000; }
-        button:disabled { background-color: #444; color: #777; cursor: not-allowed; }
-        
-        .status-panel {
-            background-color: #2d2d2d;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        .output-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .output-box {
-            background-color: #000;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 15px;
-            height: 250px;
-            overflow-y: auto;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            border: 1px solid #333;
-        }
-        .match-alert {
-            background-color: #155724;
-            color: #d4edda;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 15px;
-            display: none;
-            border: 1px solid #c3e6cb;
-            text-align: center;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brute Force Text Generator</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#222;
+    color:white;
+    margin:20px;
+}
+textarea{
+    width:100%;
+    height:350px;
+    background:#111;
+    color:#0f0;
+    padding:10px;
+}
+input,button{
+    padding:10px;
+    margin:5px;
+}
+</style>
+
 </head>
 <body>
 
-<div class="container">
-    <h1>Infinite Permutation Generator</h1>
-    <div class="subtitle">Systematically generating every possible text string combination</div>
-    
-    <div class="grid">
-        <div>
-            <label for="findText">Target Text to Find (Optional):</label>
-            <input type="text" id="findText" placeholder="e.g., cat, hello, a b!">
-        </div>
-        <div>
-            <label>Generator Settings:</label>
-            <div style="padding-top: 8px; color: #aaa; font-size: 14px;">
-                Includes: a-z, A-Z, 0-9, spaces, and punctuation.<br> Max Length Limit: 20,000 words.
-            </div>
-        </div>
-    </div>
-    
-    <div class="controls">
-        <button class="btn-start" id="startBtn" onclick="startGeneration()">Generate & Scan</button>
-        <button class="btn-stop" id="stopBtn" onclick="stopGeneration()" disabled>Stop</button>
-    </div>
+<h2>Brute Force Text Generator</h2>
 
-    <div class="status-panel">
-        <div class="status-row">
-            <span><strong>Status:</strong> <span id="statusText" style="color: #ff3333;">Stopped</span></span>
-            <span><strong>Current Length:</strong> <span id="currentLength">1</span> chars</span>
-        </div>
-        <div class="status-row">
-            <span><strong>Total Text Combinations Checked:</strong> <span id="comboCount">0</span></span>
-        </div>
-    </div>
+Characters:
+<input id="chars" value="abcdefghijklmnopqrstuvwxyz">
 
-    <div class="output-label">
-        <label>Live Generated Text Stream:</label>
-        <span style="color:#888; font-size:12px; margin-bottom:8px;">Showing latest batches...</span>
-    </div>
-    <div id="output" class="output-box">Press "Generate & Scan" to start...</div>
+Max Words:
+<input id="maxWords" type="number" value="1000">
 
-    <div id="matchAlert" class="match-alert">
-        🎉 MATCH FOUND! The generator successfully hit your text phrase!
-    </div>
-</div>
+<button onclick="start()">Generate</button>
+<button onclick="stop()">Stop</button>
+
+<br><br>
+
+Find:
+<input id="findText">
+<button onclick="findText()">Find</button>
+
+<br><br>
+
+<textarea id="output"></textarea>
 
 <script>
-    let isRunning = false;
-    let loopTimeout = null;
-    let totalCombinations = 0;
-    
-    // Character pool: Lowercase, Uppercase, Numbers, Space, Punctuation
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,?!@#_+-=";
-    const base = charset.length;
-    
-    let currentLength = 1;
-    let currentIndexes = [0]; // Tracks character indexes for the current length
 
-    function startGeneration() {
-        if (isRunning) return;
-        isRunning = true;
-        
-        document.getElementById('startBtn').disabled = true;
-        document.getElementById('stopBtn').disabled = false;
-        document.getElementById('statusText').textContent = "Running...";
-        document.getElementById('statusText').style.color = "#00ff66";
-        document.getElementById('matchAlert').style.display = "none";
-        
-        // Reset counters if starting fresh
-        if (totalCombinations === 0) {
-            currentLength = 1;
-            currentIndexes = [0];
-            document.getElementById('output').innerHTML = "";
-        }
+let running=false;
 
-        generateBatch();
-    }
+function start(){
 
-    function generateBatch() {
-        if (!isRunning) return;
+running=true;
 
-        const findTarget = document.getElementById('findText').value;
-        const outputDiv = document.getElementById('output');
-        let batchOutput = [];
-        const batchSize = 1000; // Processes 1000 combinations per cycle for speed
+const chars=document.getElementById("chars").value;
+const limit=parseInt(document.getElementById("maxWords").value);
 
-        for (let b = 0; b < batchSize; b++) {
-            // Build string from current indexes
-            let generatedString = "";
-            for (let i = 0; i < currentIndexes.length; i++) {
-                generatedString += charset[currentIndexes[i]];
-            }
+const output=document.getElementById("output");
+output.value="";
 
-            batchOutput.push(generatedString);
-            totalCombinations++;
+let generated=0;
 
-            // Check if it matches what the user wanted to find
-            if (findTarget && generatedString === findTarget) {
-                outputDiv.textContent += "\n\n>>> [FOUND]: " + generatedString;
-                document.getElementById('matchAlert').style.display = "block";
-                stopGeneration();
-                return;
-            }
+function generate(prefix){
 
-            // Move to the next combination (Base-N odometer logic)
-            let carry = true;
-            for (let i = currentIndexes.length - 1; i >= 0; i--) {
-                if (carry) {
-                    currentIndexes[i]++;
-                    if (currentIndexes[i] < base) {
-                        carry = false;
-                    } else {
-                        currentIndexes[i] = 0; // Carry over to next position
-                    }
-                }
-            }
+if(!running)return;
 
-            // If carry remains true, we've exhausted this length. Scale up by 1 character.
-            if (carry) {
-                currentLength++;
-                if (currentLength > 100000) { // Safety guard
-                    stopGeneration();
-                    alert("Reached limit!");
-                    return;
-                }
-                currentIndexes = Array(currentLength).fill(0);
-                document.getElementById('currentLength').textContent = currentLength;
-            }
-        }
+if(generated>=limit)return;
 
-        // Update UI with the batch
-        outputDiv.textContent = batchOutput.join(" | ");
-        outputDiv.scrollTop = outputDiv.scrollHeight; // Auto scroll
-        document.getElementById('comboCount').textContent = totalCombinations.toLocaleString();
+if(prefix.length>0){
+output.value+=prefix+" ";
+generated++;
+}
 
-        // Queue next batch
-        loopTimeout = setTimeout(generateBatch, 1);
-    }
+for(let c of chars){
 
-    function stopGeneration() {
-        isRunning = false;
-        clearTimeout(loopTimeout);
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('stopBtn').disabled = true;
-        document.getElementById('statusText').textContent = "Stopped";
-        document.getElementById('statusText').style.color = "#ff3333";
-    }
+if(!running)return;
+
+if(generated>=limit)return;
+
+generate(prefix+c);
+
+}
+
+}
+
+generate("");
+
+}
+
+function stop(){
+running=false;
+}
+
+function findText(){
+
+const text=document.getElementById("findText").value;
+
+const area=document.getElementById("output");
+
+const pos=area.value.indexOf(text);
+
+if(pos==-1){
+
+alert("Not Found");
+
+}else{
+
+area.focus();
+area.setSelectionRange(pos,pos+text.length);
+
+alert("Found at character "+pos);
+
+}
+
+}
+
 </script>
 
 </body>
